@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <?!= include('Styles'); ?>
+  <style>
+    .hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 6px 0 20px; }
+    .hero h1 { font-size: 28px; margin: 0 0 6px; }
+    .hero p { margin: 0; color: var(--muted); max-width: 520px; }
+    .tally { display: flex; gap: 10px; }
+    .tally div { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; min-width: 120px; }
+    .tally b { display: block; font: 800 22px/1.1 Montserrat, sans-serif; color: var(--deep); font-variant-numeric: tabular-nums; }
+    .tally span { font-size: 12px; color: var(--muted); }
+
+    .tabs { display: inline-flex; background: #E5EAF4; border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 20px; }
+    .tab { border: 0; background: transparent; padding: 8px 16px; border-radius: 9px; font-weight: 600; cursor: pointer; color: var(--muted); }
+    .tab.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .tab .n { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--red); color: #fff; font-size: 12px; }
+
+    .formcard { padding: 24px; }
+    .formcard h2 { margin: 0 0 4px; font-size: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 16px; margin-top: 18px; }
+    .field { grid-column: span 4; }
+    .field.half { grid-column: span 2; }
+    .divider { grid-column: span 4; border-top: 1px solid var(--line); }
+    .seg { display: inline-flex; border: 1px solid #CDD6E6; border-radius: 10px; overflow: hidden; background: #fff; flex-wrap: wrap; }
+    .seg button { border: 0; background: transparent; padding: 9px 16px; cursor: pointer; font-weight: 500; border-right: 1px solid #CDD6E6; }
+    .seg button:last-child { border-right: 0; }
+    .seg button.on { background: var(--deep); color: #fff; font-weight: 600; }
+    .summary { grid-column: span 4; border-radius: 12px; padding: 14px 16px; background: var(--mint); border: 1px solid #CCD8F2; display: grid; gap: 6px; font-size: 14px; }
+    .summary .big { font: 700 17px Montserrat, sans-serif; color: var(--deep); }
+    .summary .warn { color: #9A3412; }
+    .summary .warn::before { content: "! "; font-weight: 700; }
+    .private { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+    .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+    .editing { background: #FFF7ED; border: 1px solid #FED7AA; color: #9A3412; padding: 10px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 14px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+
+    .done { text-align: center; padding: 44px 24px; }
+    .done .big { width: 64px; height: 64px; border-radius: 50%; background: var(--mint); color: var(--ok); display: grid; place-items: center; margin: 0 auto 14px; }
+    .done h2 { margin: 0 0 6px; }
+    .done .id { font-family: ui-monospace, Menlo, monospace; background: var(--bg); padding: 2px 8px; border-radius: 6px; }
+
+    .mine { display: grid; gap: 12px; }
+    .item { padding: 16px 18px; }
+    .item.hl { box-shadow: 0 0 0 3px rgba(63,100,194,.45); }
+    .item .top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .item h3 { margin: 4px 0 2px; font-size: 16px; }
+    .item .note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--bg); font-size: 14px; white-space: pre-wrap; }
+    .item .note b { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+    .item .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 10px; flex-wrap: wrap; }
+    .item .btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .pill.Cancelled { background: #EEF0EE; color: #4B5563; }
+
+    @media (max-width: 560px) {
+      .hero h1 { font-size: 23px; }
+      .tally { width: 100%; } .tally div { flex: 1; min-width: 0; }
+      .formcard { padding: 18px 16px; }
+      .grid { grid-template-columns: 1fr 1fr; }
+      .field, .field.half, .divider, .summary { grid-column: span 2; }
+      .seg { display: flex; } .seg button { flex: 1; padding: 9px 8px; }
+      .actions .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="mark">HQA</div>
+      <div class="brand">Time Off<small>HQA Spring · Staff requests</small></div>
+      <div class="spacer"></div>
+      <div class="who" id="who"></div>
+    </div>
+  </header>
+  <div class="banner" role="img" aria-label="Houston Quran Academy Spring"></div>
+  <main class="wrap narrow" id="app"><div class="loading"><div class="spinner"></div>Loading…</div></main>
+  <div class="toast" id="toast"></div>
+
+<script>
+const COVERAGE = ['Lesson plans in sub folder', 'Co-teacher covering', 'Need a substitute', 'Not needed'];
+const state = { me: null, tab: 'new', editing: null, highlight: '', f: {} };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pill = (s) => '<span class="pill ' + s.split(' ')[0] + '">' + esc(s) + '</span>';
+const toYmd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const parseYmd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const fmtShort = (s) => parseYmd(s).toLocaleDateString([], { month: 'short', day: 'numeric' });
+function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3500); }
+const nice = (n) => (Math.round(n * 100) / 100) + (n === 1 ? ' day' : ' days');
+
+/* Same day-counting rules as the server */
+function closed(y) { return state.me.noSchool.find((p) => y >= p.start && y <= p.end); }
+function schoolDays(from, to) {
+  const out = [], skipped = new Set(); const d = parseYmd(from), end = parseYmd(to || from);
+  if (end < d) return { days: [], skipped: [] };
+  while (d <= end) { const y = toYmd(d); const c = closed(y); if (c) skipped.add(c.label); else if (d.getDay() % 6) out.push(y); d.setDate(d.getDate() + 1); }
+  return { days: out, skipped: [...skipped] };
+}
+
+function render() {
+  const me = state.me;
+  const open = me.requests.filter((r) => r.status === 'Pending' || r.status === 'Needs Info').length;
+  $('app').innerHTML =
+    '<section class="hero"><div><h1>Assalamu alaikum' + (me.name ? ', ' + esc((/^(ms|mr|mrs|miss|dr|sr|br|sh|ustadh|ustadha|sister|brother)\.?$/i.test(me.name.split(' ')[0]) && me.name.split(' ')[1]) ? me.name.split(' ').slice(0, 2).join(' ') : me.name.split(' ')[0]) : '') + '</h1>' +
+    '<p>Request time off and track it here. HR and the Principal review every request, and you’ll get an email with the decision.</p></div>' +
+    '<div class="tally"><div><b>' + me.usedThisYear + (me.annualDays ? '<span style="font-size:14px;color:var(--muted)"> / ' + me.annualDays + '</span>' : '') + '</b><span>days approved this school year</span></div>' +
+    '<div><b>' + open + '</b><span>waiting on a decision</span></div></div></section>' +
+    '<div class="tabs" role="tablist"><button class="tab' + (state.tab === 'new' ? ' on' : '') + '" data-t="new">New request</button>' +
+    '<button class="tab' + (state.tab === 'mine' ? ' on' : '') + '" data-t="mine">My time off' + (open ? '<span class="n">' + open + '</span>' : '') + '</button></div><div id="view"></div>';
+  document.querySelectorAll('.tab').forEach((b) => b.onclick = () => { state.tab = b.dataset.t; if (b.dataset.t === 'new' && !state.editing) state.f = {}; render(); });
+  state.tab === 'new' ? renderForm() : renderMine();
+}
+
+function chips(id, options, multi) {
+  return '<div class="chips" id="' + id + '" data-multi="' + (multi ? 1 : 0) + '">' + options.map((o) => '<span class="chip" tabindex="0" role="button" data-v="' + esc(o) + '">' + esc(o) + '</span>').join('') + '</div>';
+}
+function field(id, label, inner, opts) {
+  opts = opts || {};
+  return '<div class="field ' + (opts.half ? 'half' : '') + '" data-f="' + id + '"' + (opts.hidden ? ' hidden' : '') + '><label class="lbl" for="f_' + id + '">' + label + (opts.req ? '<span class="req">*</span>' : '') + (opts.extra || '') + '</label>' + inner +
+    (opts.hint ? '<div class="hint">' + opts.hint + '</div>' : '') + '<div class="err" hidden></div></div>';
+}
+
+function renderForm() {
+  const me = state.me, f = state.f;
+  $('view').innerHTML =
+    (state.editing ? '<div class="editing"><span>Editing your request from ' + esc(state.editing.shortDate) + '. Resubmitting sends it back for review.</span><button class="btn btn-ghost" id="cancelEdit">Cancel</button></div>' : '') +
+    '<div class="card formcard"><h2>' + (state.editing ? 'Update time off request' : 'Request time off') + '</h2><div class="muted small">Fields marked <span style="color:var(--warn)">*</span> are required.</div>' +
+    '<div class="grid">' +
+      field('name', 'Your name', '<input type="text" id="f_name">', { req: true, half: true }) +
+      field('role', 'Role / department', '<input type="text" id="f_role" placeholder="e.g. 3rd Grade Teacher" list="roles"><datalist id="roles"><option value="Teacher"><option value="Teaching assistant"><option value="Front office"><option value="Administration"><option value="Quran / Islamic Studies"></datalist>', { req: true, half: true }) +
+      '<div class="divider"></div>' +
+      field('leaveType', 'Type of leave', chips('f_leaveType', me.leaveTypes), { req: true }) +
+      field('duration', 'How long?', '<div class="seg" id="f_duration"><button type="button" data-v="Full day(s)">Full day(s)</button><button type="button" data-v="Half day">Half day</button><button type="button" data-v="Partial day">Partial day</button></div>', { req: true }) +
+      field('date', 'First day', '<input type="date" id="f_date">', { req: true, half: true }) +
+      field('endDate', 'Last day', '<input type="date" id="f_endDate">', { half: true, hint: 'Leave blank for one day.' }) +
+      field('halfPart', 'Which half?', chips('f_halfPart', ['Morning', 'Afternoon']), { half: true, req: true }) +
+      field('start', 'Leaving / out from', '<input type="time" id="f_start">', { half: true, req: true }) +
+      field('end', 'Back at', '<input type="time" id="f_end">', { half: true, req: true }) +
+      '<div class="summary" id="summary" hidden></div>' +
+      '<div class="divider"></div>' +
+      field('coverage', 'Class coverage', chips('f_coverage', COVERAGE, true), { hint: 'Teachers: how will your class be covered?' }) +
+      field('coverageNotes', 'Coverage notes', '<textarea id="f_coverageNotes" placeholder="Where plans are, who is covering, anything the sub should know"></textarea>') +
+      field('reason', 'Reason', '<textarea id="f_reason" placeholder="Optional"></textarea>', { extra: '<span class="private">Only HR and the Principal see this</span>' }) +
+    '</div>' +
+    '<div class="actions"><span class="small muted">You’ll get an email as soon as it’s reviewed.</span><button class="btn btn-primary" id="submit">' + (state.editing ? 'Resubmit' : 'Send request') + '</button></div></div>';
+
+  // Fill
+  $('f_name').value = f.name != null ? f.name : (me.name || '');
+  $('f_role').value = f.role != null ? f.role : (me.role || '');
+  ['date', 'endDate', 'start', 'end', 'coverageNotes', 'reason'].forEach((k) => { if (f[k]) $('f_' + k).value = f[k]; });
+  setChips('f_leaveType', f.leaveType); setChips('f_halfPart', f.halfPart || 'Morning'); setChips('f_coverage', f.coverage || []);
+  setSeg(f.duration || 'Full day(s)');
+
+  // Wire
+  document.querySelectorAll('.chips').forEach((g) => g.querySelectorAll('.chip').forEach((c) => {
+    const t = () => { if (g.dataset.multi !== '1') g.querySelectorAll('.chip').forEach((x) => x !== c && x.classList.remove('on')); c.classList.toggle('on'); clearErr(g.closest('.field')); update(); };
+    c.onclick = t; c.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); t(); } };
+  }));
+  document.querySelectorAll('#f_duration button').forEach((b) => b.onclick = () => { setSeg(b.dataset.v); update(); });
+  document.querySelectorAll('#view input, #view textarea').forEach((el) => el.addEventListener('input', () => { clearErr(el.closest('.field')); update(); }));
+  if ($('cancelEdit')) $('cancelEdit').onclick = () => { state.editing = null; state.f = {}; state.tab = 'mine'; render(); };
+  $('submit').onclick = submit;
+  update();
+}
+
+function setChips(id, v) { const vals = [].concat(v || []); document.querySelectorAll('#' + id + ' .chip').forEach((c) => c.classList.toggle('on', vals.indexOf(c.dataset.v) > -1)); }
+function getChips(id, multi) { const on = [...document.querySelectorAll('#' + id + ' .chip.on')].map((c) => c.dataset.v); return multi ? on : (on[0] || ''); }
+function setSeg(v) { document.querySelectorAll('#f_duration button').forEach((b) => b.classList.toggle('on', b.dataset.v === v)); }
+function getSeg() { const b = document.querySelector('#f_duration button.on'); return b ? b.dataset.v : 'Full day(s)'; }
+function show(id, on) { const el = document.querySelector('.field[data-f="' + id + '"]'); if (el) el.hidden = !on; }
+
+function read() {
+  return { name: $('f_name').value.trim(), role: $('f_role').value.trim(), leaveType: getChips('f_leaveType'), duration: getSeg(),
+    date: $('f_date').value, endDate: $('f_endDate').value, halfPart: getChips('f_halfPart'), start: $('f_start').value, end: $('f_end').value,
+    coverage: getChips('f_coverage', true), coverageNotes: $('f_coverageNotes').value.trim(), reason: $('f_reason').value.trim() };
+}
+
+function update() {
+  const v = read(), me = state.me;
+  show('endDate', v.duration === 'Full day(s)'); show('halfPart', v.duration === 'Half day');
+  show('start', v.duration === 'Partial day'); show('end', v.duration === 'Partial day');
+  $('f_date').closest('.field').querySelector('.lbl').firstChild.textContent = v.duration === 'Full day(s)' ? 'First day' : 'Date';
+  const s = $('summary');
+  if (!v.date) { s.hidden = true; return; }
+  const to = v.duration === 'Full day(s)' ? (v.endDate || v.date) : v.date;
+  const sd = schoolDays(v.date, to);
+  let count = sd.days.length, line;
+  if (v.duration === 'Half day') { count = sd.days.length ? 0.5 : 0; line = 'Counts as half a day (' + (v.halfPart || 'Morning').toLowerCase() + ')'; }
+  else if (v.duration === 'Partial day') {
+    const hrs = v.start && v.end ? Math.max(0, (parseYmd('2000-01-01').setHours(...v.end.split(':')) - parseYmd('2000-01-01').setHours(...v.start.split(':'))) / 36e5) : 0;
+    line = hrs ? 'Counts as ' + (Math.round(hrs * 10) / 10) + ' hours' : 'Add your times';
+    if (!sd.days.length) count = 0;
+  } else line = 'Counts as ' + nice(count);
+  const notes = [];
+  if (sd.skipped.length) notes.push('<div class="muted">Skips ' + esc(sd.skipped.join(', ')) + ' (no school).</div>');
+  if (!sd.days.length) notes.push('<div class="warn">These dates are a weekend or school break, so no time off is needed.</div>');
+  const busy = me.busy.filter((p) => sd.days.some((d) => d >= p.start && d <= p.end));
+  if (busy.length) notes.push('<div class="warn">Busy week: ' + esc(busy.map((p) => p.label).join(', ')) + '. HR may ask about coverage.</div>');
+  const ahead = Math.round((parseYmd(v.date) - new Date(new Date().toDateString())) / 864e5);
+  if (v.leaveType && me.noticeExempt.indexOf(v.leaveType) < 0 && ahead < me.minNotice && ahead >= 0)
+    notes.push('<div class="warn">Planned leave should be requested ' + me.minNotice + '+ days ahead. You can still send it.</div>');
+  if (me.annualDays && v.duration === 'Full day(s)' && me.usedThisYear + count > me.annualDays)
+    notes.push('<div class="warn">This would bring you to ' + (me.usedThisYear + count) + ' of ' + me.annualDays + ' days this year.</div>');
+  s.innerHTML = '<div class="big">' + esc(line) + '</div>' + notes.join('');
+  s.hidden = false;
+}
+
+function setErr(id, msg) { const f = document.querySelector('.field[data-f="' + id + '"]'); if (!f) return; f.classList.add('invalid'); const e = f.querySelector('.err'); e.textContent = msg; e.hidden = false; }
+function clearErr(f) { if (!f) return; f.classList.remove('invalid'); const e = f.querySelector('.err'); if (e) e.hidden = true; }
+
+function submit() {
+  const v = read();
+  document.querySelectorAll('.field.invalid').forEach(clearErr);
+  const bad = [];
+  if (!v.name) bad.push(['name', 'Required.']);
+  if (!v.role) bad.push(['role', 'Required.']);
+  if (!v.leaveType) bad.push(['leaveType', 'Please choose one.']);
+  if (!v.date) bad.push(['date', 'Required.']);
+  if (v.duration === 'Full day(s)' && v.endDate && v.date && v.endDate < v.date) bad.push(['endDate', 'Can’t be before the first day.']);
+  if (v.duration === 'Partial day') {
+    if (!v.start) bad.push(['start', 'Required.']);
+    if (!v.end) bad.push(['end', 'Required.']); else if (v.start && v.end <= v.start) bad.push(['end', 'Must be after the start time.']);
+  }
+  if (/teacher/i.test(v.role) && !v.coverage.length) bad.push(['coverage', 'Teachers: please say how your class will be covered.']);
+  if (bad.length) {
+    bad.forEach(([id, m]) => setErr(id, m));
+    document.querySelector('.field.invalid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Please fix the highlighted fields.');
+    return;
+  }
+  if (v.duration !== 'Full day(s)') v.endDate = '';
+  v.id = state.editing ? state.editing.id : '';
+  const btn = $('submit'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Sending…';
+  google.script.run.withSuccessHandler((r) => {
+    const i = state.me.requests.findIndex((x) => x.id === r.id);
+    if (i > -1) state.me.requests[i] = r; else state.me.requests.unshift(r);
+    state.me.name = r.name; state.me.role = r.role;
+    const wasEdit = !!state.editing; state.editing = null; state.f = {};
+    $('view').innerHTML = '<div class="card done"><div class="big"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>' +
+      '<h2>' + (wasEdit ? 'Resubmitted' : 'Request sent') + '</h2><p class="muted">' + esc(r.leaveType) + ' · ' + esc(r.dateLabel) + ' · ' + esc(r.daysLabel) + '<br>Request ID <span class="id">' + esc(r.id) + '</span></p>' +
+      '<p class="muted small">We emailed you a copy. You’ll get another email when it’s reviewed.</p>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px"><button class="btn btn-ghost" id="another">Request more time</button><button class="btn btn-primary" id="seeMine">View my time off</button></div></div>';
+    $('another').onclick = () => { state.tab = 'new'; render(); };
+    $('seeMine').onclick = () => { state.tab = 'mine'; state.highlight = r.id; render(); };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }).withFailureHandler((e) => { btn.disabled = false; btn.textContent = state.editing ? 'Resubmit' : 'Send request'; toast(e.message); }).submitTimeOff(v);
+}
+
+function renderMine() {
+  const list = state.me.requests;
+  if (!list.length) { $('view').innerHTML = '<div class="card empty"><div><b>No time off requests yet</b></div><div class="small">Requests you send will show up here with their status.</div></div>'; return; }
+  const today = toYmd(new Date());
+  $('view').innerHTML = '<div class="mine">' + list.map((r) => {
+    const canEdit = r.status === 'Pending' || r.status === 'Needs Info';
+    const canCancel = ['Pending', 'Needs Info', 'Approved'].indexOf(r.status) > -1 && (r.endDate || r.date) >= today;
+    return '<div class="card item' + (state.highlight === r.id ? ' hl' : '') + '" id="r_' + esc(r.id) + '">' +
+      '<div class="top"><div><span class="tag" style="color:var(--sage-ink)">' + esc(r.leaveType) + '</span><h3>' + esc(r.dateLabel) + '</h3>' +
+      '<div class="small muted">' + esc(r.durationLabel) + ' · ' + esc(r.daysLabel) + '</div></div>' + pill(r.status) + '</div>' +
+      (r.note ? '<div class="note"><b>Note from ' + esc(r.decidedBy || 'HR') + '</b>' + esc(r.note) + '</div>' : '') +
+      '<div class="foot"><span class="small muted">' + esc(r.id) + ' · sent ' + esc(r.submittedLabel) + (r.decidedLabel ? ' · reviewed ' + esc(r.decidedLabel) : '') + '</span>' +
+      '<span class="btns" id="b_' + esc(r.id) + '">' +
+        (canCancel ? '<button class="btn btn-ghost" data-cancel="' + esc(r.id) + '">Cancel request</button>' : '') +
+        (canEdit ? '<button class="btn ' + (r.status === 'Needs Info' ? 'btn-primary' : 'btn-ghost') + '" data-edit="' + esc(r.id) + '">' + (r.status === 'Needs Info' ? 'Update & resubmit' : 'Edit') + '</button>' : '') +
+      '</span></div></div>';
+  }).join('') + '</div>';
+
+  document.querySelectorAll('[data-edit]').forEach((b) => b.onclick = () => {
+    const r = list.find((x) => x.id === b.dataset.edit);
+    state.editing = r; state.f = Object.assign({}, r); state.tab = 'new'; render();
+  });
+  document.querySelectorAll('[data-cancel]').forEach((b) => b.onclick = () => {
+    const id = b.dataset.cancel, box = $('b_' + id), keep = box.innerHTML;
+    box.innerHTML = '<span class="small">Cancel this time off?</span><button class="btn btn-bad" data-yes>Yes, cancel it</button><button class="btn btn-ghost" data-no>Keep it</button>';
+    box.querySelector('[data-no]').onclick = () => renderMine();
+    box.querySelector('[data-yes]').onclick = (e) => {
+      e.target.disabled = true;
+      google.script.run.withSuccessHandler((r) => {
+        const i = state.me.requests.findIndex((x) => x.id === r.id); state.me.requests[i] = r; toast('Cancelled. HR has been told.'); render();
+      }).withFailureHandler((err) => { toast(err.message); box.innerHTML = keep; }).cancelTimeOff(id);
+    };
+  });
+  if (state.highlight && $('r_' + state.highlight)) setTimeout(() => $('r_' + state.highlight).scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+}
+
+google.script.url.getLocation((loc) => {
+  const p = loc.parameter || {};
+  if (p.page === 'mine') { state.tab = 'mine'; state.highlight = p.id || ''; }
+  google.script.run.withSuccessHandler((me) => {
+    state.me = me;
+    $('who').innerHTML = (me.testMode ? '<span class="trial">Trial mode</span> ' : '') + '<span>' + esc(me.email) + '</span>' + (me.isApprover ? '<br><a href="' + esc(me.reviewUrl) + '">HR dashboard →</a>' : '');
+    render();
+  }).withFailureHandler((e) => { $('app').innerHTML = '<div class="card empty"><b>Couldn’t load.</b><div class="small">' + esc(e.message) + '</div></div>'; }).getStaffData();
+});
+</script>
+</body>
+</html>
